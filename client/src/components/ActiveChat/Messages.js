@@ -1,13 +1,20 @@
 import React from 'react';
-import { Box } from '@material-ui/core';
+import { Box, makeStyles } from '@material-ui/core';
 import { SenderBubble, OtherUserBubble } from '.';
 import moment from 'moment';
 
-const Messages = (props) => {
-  const { messages, otherUser, userId } = props;
+const useStyles = makeStyles(() => ({
+  messageContainer: {
+    display: 'flex',
+	flexDirection: 'column-reverse',
+  },
+}));
 
+const Messages = (props) => {
+  const classes = useStyles();
+  const { messages, otherUser, userId } = props;
   return (
-    <Box>
+    <Box className={classes.messageContainer}>
       {messages.map((message) => {
         const time = moment(message.createdAt).format('h:mm');
 
