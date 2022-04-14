@@ -46,11 +46,14 @@ class Conversations(APIView):
                 convo_dict["latestMessageText"] = convo_dict["messages"][0]["text"]
 
                 # set a property "otherUser" so that frontend will have easier access
+				# simultaneously set a property "unread" to indicate how many messages the user has left unread
                 user_fields = ["id", "username", "photoUrl"]
                 if convo.user1 and convo.user1.id != user_id:
                     convo_dict["otherUser"] = convo.user1.to_dict(user_fields)
+                    convo_dict["unread"] = convo.user2Unread
                 elif convo.user2 and convo.user2.id != user_id:
                     convo_dict["otherUser"] = convo.user2.to_dict(user_fields)
+                    convo_dict["unread"] = convo.user1Unread
 
                 # set property for online status of the other user
                 if convo_dict["otherUser"]["id"] in online_users:
