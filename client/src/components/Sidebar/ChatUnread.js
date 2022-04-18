@@ -9,10 +9,8 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const ChatUnread = ({ conversation }) => {
+const ChatUnread = ({ unread }) => {
   const classes = useStyles();
-
-  const unread = conversation.unread;
 
   if(!unread)
 	return null;
