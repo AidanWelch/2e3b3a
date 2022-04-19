@@ -99,7 +99,7 @@ const Home = ({ user, logout }) => {
   const clearUnread = (username) => 
     setConversations((prev) => 
       prev.map((convo) => {
-        if (convo.otherUser.username === username) {
+        if (convo.otherUser.username === username && convo.messages.length > 0) {
           const convoCopy = { ...convo };
           convoCopy.unread = 0;
           axios.put("/api/conversations/read", { conversationId: convoCopy.id });
