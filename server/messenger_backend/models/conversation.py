@@ -15,12 +15,12 @@ class Conversation(utils.CustomModel):
     def find_conversation(userIds):
         # return conversation or None if it doesn't exist
         try:
-			# first query only conversations with userIds in the array
+            # first query only conversations with userIds in the array
             query = Q()
             for user in userIds:
                 query &= Q(users__in=userIds)
             filter = Conversation.objects.filter(query)
-			# then only get the one with the same number of users
+            # then only get the one with the same number of users
             return filter.annotate(count=Count("users")).get(count=len(userIds))
         except Conversation.DoesNotExist:
             return None
