@@ -9,8 +9,8 @@ class ConversationUser(utils.CustomModel):
     unread = models.PositiveSmallIntegerField(default=0)
     user = models.ForeignKey(
         User,
-		on_delete=models.CASCADE,
-		db_column="userId",
+        on_delete=models.CASCADE,
+        db_column="userId",
     )
     conversation = models.ForeignKey(
         Conversation,
