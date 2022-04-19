@@ -102,7 +102,7 @@ const Home = ({ user, logout }) => {
         if (convo.otherUser.username === username) {
           const convoCopy = { ...convo };
           convoCopy.unread = 0;
-          socket.emit("clear-unread", convoCopy.otherUser.id, convoCopy.id);
+          axios.put("/api/conversations/read", { conversationId: convoCopy.id });
           return convoCopy;
         } else {
           return convo

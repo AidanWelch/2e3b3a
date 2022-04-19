@@ -72,3 +72,31 @@ class Conversations(APIView):
             )
         except Exception as e:
             return HttpResponse(status=500)
+    
+class Read(APIView):
+    def put(self, request):
+        try:
+            user = get_user(request)
+
+            if user.is_anonymous:
+                return HttpResponse(status=401)
+
+            sender_id = user.id
+            body = request.data
+            conversation_id = body.get("conversationId")
+
+            conversation = Conversation.objects.filter(id=conversation_id).first() if conversation_id else None
+
+            if not conversation:
+                return HttpResponse(status=404)
+
+            # clear the unread for the user in the conversation
+            if conversation.user1 and conversation.user1.id == sender_id:
+                conversation.user1Unread = 0
+            elif conversation.user2 and conversation.user2.id == sender_id:
+                conversation.user2Unread = 0
+            conversation.save()
+
+            return HttpResponse(status=204)
+        except Exception as e:
+            return HttpResponse(status=500)
