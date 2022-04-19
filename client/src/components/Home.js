@@ -80,37 +80,35 @@ const Home = ({ user, logout }) => {
 
   const addNewConvo = useCallback(
     (recipientId, message) => {
-	  setConversations((prev) =>
-	    prev.map((convo) => {
-		  if (convo.otherUser.id === recipientId) {
-			const convoCopy = { ...convo };
-			convoCopy.messages = [ ...convo.messages, message ];
-			convoCopy.id = message.conversationId;
-			return convoCopy;
-		  } else {
-			return convo;
-		  }
-		})
-	  )
+      setConversations((prev) =>
+        prev.map((convo) => {
+          if (convo.otherUser.id === recipientId) {
+            const convoCopy = { ...convo };
+            convoCopy.messages = [ ...convo.messages, message ];
+            convoCopy.id = message.conversationId;
+            return convoCopy;
+          } else {
+            return convo;
+          }
+        })
+      )
     },
     [setConversations, conversations],
   );
 
   const clearUnread = (username) => 
-	  setConversations((prev) => 
-	    prev.map((convo) => {
-			if (convo.otherUser.username === username) {
-				const convoCopy = { ...convo };
-				convoCopy.unread = 0;
-				
-				socket.emit("clear-unread", convoCopy.otherUser.id, convoCopy.id);
-
-				return convoCopy;
-			} else {
-				return convo
-			}
-		})
-	  );
+    setConversations((prev) => 
+      prev.map((convo) => {
+        if (convo.otherUser.username === username) {
+          const convoCopy = { ...convo };
+          convoCopy.unread = 0;
+          socket.emit("clear-unread", convoCopy.otherUser.id, convoCopy.id);
+          return convoCopy;
+        } else {
+          return convo
+        }
+      })
+    );
 
   const addMessageToConversation = useCallback(
     (data) => {
@@ -121,41 +119,41 @@ const Home = ({ user, logout }) => {
           id: message.conversationId,
           otherUser: sender,
           messages: [message],
-		  unread: 1,
+          unread: 1,
         };
         newConvo.latestMessageText = message.text;
         setConversations((prev) => [newConvo, ...prev]);
-		if (newConvo.otherUser.username === activeConversation) {
-		  clearUnread(activeConversation);
-		}
+        if (newConvo.otherUser.username === activeConversation) {
+          clearUnread(activeConversation);
+        }
       } else {
-		setConversations((prev) => 
-		  prev.map((convo) => {
-			if (convo.id === message.conversationId) {
-			  const convoCopy = { ...convo };
-			  convoCopy.messages = [ ...convo.messages, message ];
-			  convoCopy.latestMessageText = message.text;
-			  if (convoCopy.otherUser.id === message.senderId) {
-				if (convoCopy.otherUser.username === activeConversation) {
-				  clearUnread(activeConversation);
-				} else {
-				  convoCopy.unread++;
-				}
-			  }
-			  return convoCopy;
-			} else {
-			  return convo;
-			}
-		  })
-		)
-	  }
+        setConversations((prev) => 
+          prev.map((convo) => {
+            if (convo.id === message.conversationId) {
+              const convoCopy = { ...convo };
+              convoCopy.messages = [ ...convo.messages, message ];
+              convoCopy.latestMessageText = message.text;
+              if (convoCopy.otherUser.id === message.senderId) {
+                if (convoCopy.otherUser.username === activeConversation) {
+                  clearUnread(activeConversation);
+                } else {
+                  convoCopy.unread++;
+                }
+              }
+              return convoCopy;
+            } else {
+              return convo;
+            }
+          })
+        )
+      }
     },
-    [setConversations, conversations, activeConversation],
+    [setConversations, clearUnread, conversations, activeConversation],
   );
 
   const setActiveChat = (username) => {
     setActiveConversation(username);
-	clearUnread(username);
+    clearUnread(username);
   };
 
   const addOnlineUser = useCallback((id) => {
@@ -220,9 +218,9 @@ const Home = ({ user, logout }) => {
     const fetchConversations = async () => {
       try {
         const { data } = await axios.get("/api/conversations");
-		data.forEach((convo) => {
-			convo.messages.reverse();
-		});
+        data.forEach((convo) => {
+          convo.messages.reverse();
+        });
         setConversations(data);
       } catch (error) {
         console.error(error);

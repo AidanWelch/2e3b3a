@@ -34,7 +34,7 @@ const Chat = ({ conversation, setActiveChat }) => {
         sidebar={true}
       />
       <ChatContent conversation={conversation} />
-	  <ChatUnread conversation={conversation} />
+      <ChatUnread unread={conversation.unread} />
     </Box>
   );
 };
