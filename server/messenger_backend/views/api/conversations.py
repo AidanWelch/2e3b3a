@@ -95,6 +95,9 @@ class Read(APIView):
                 conversation.user1Unread = 0
             elif conversation.user2 and conversation.user2.id == sender_id:
                 conversation.user2Unread = 0
+            else:
+                return HttpResponse(status=403)
+
             conversation.save()
 
             return HttpResponse(status=204)
