@@ -96,19 +96,14 @@ const Home = ({ user, logout }) => {
     [setConversations, conversations],
   );
 
-  const clearUnread = (username) => 
-    setConversations((prev) => 
-      prev.map((convo) => {
-        if (convo.otherUser.username === username && convo.messages.length > 0) {
-          const convoCopy = { ...convo };
-          convoCopy.unread = 0;
-          axios.put("/api/conversations/read", { conversationId: convoCopy.id });
-          return convoCopy;
-        } else {
-          return convo
-        }
-      })
-    );
+  const clearUnread = (convo) => {
+    // note this does not shallow copy and will instead mutate the passed convo
+    if (convo.messages.length > 0) {
+      convo.unread = 0;
+      axios.put("/api/conversations/read", { conversationId: convo.id });
+    }
+    return convo;
+  }
 
   const addMessageToConversation = useCallback(
     (data) => {
@@ -122,10 +117,10 @@ const Home = ({ user, logout }) => {
           unread: 1,
         };
         newConvo.latestMessageText = message.text;
-        setConversations((prev) => [newConvo, ...prev]);
         if (newConvo.otherUser.username === activeConversation) {
-          clearUnread(activeConversation);
+          newConvo = clearUnread(activeConversation);
         }
+        setConversations((prev) => [newConvo, ...prev]);
       } else {
         setConversations((prev) => 
           prev.map((convo) => {
@@ -135,7 +130,7 @@ const Home = ({ user, logout }) => {
               convoCopy.latestMessageText = message.text;
               if (convoCopy.otherUser.id === message.senderId) {
                 if (convoCopy.otherUser.username === activeConversation) {
-                  clearUnread(activeConversation);
+                  convoCopy = clearUnread(activeConversation);
                 } else {
                   convoCopy.unread++;
                 }
@@ -153,7 +148,16 @@ const Home = ({ user, logout }) => {
 
   const setActiveChat = (username) => {
     setActiveConversation(username);
-    clearUnread(username);
+    setConversations((prev) => 
+      prev.map((convo) => {
+        if (convo.otherUser.username === username) {
+          const convoCopy = { ...convo };
+          return clearUnread(convoCopy);
+        } else {
+          return convo
+        }
+      })
+    );
   };
 
   const addOnlineUser = useCallback((id) => {
