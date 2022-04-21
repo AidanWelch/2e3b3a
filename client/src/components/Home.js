@@ -97,12 +97,11 @@ const Home = ({ user, logout }) => {
   );
 
   const clearUnread = (convo) => {
-    // note this does not shallow copy and will instead mutate the passed convo
     if (convo.messages.length > 0) {
-      convo.unread = 0;
       axios.put("/api/conversations/read", { conversationId: convo.id });
+      return 0;
     }
-    return convo;
+    return convo.unread;
   }
 
   const addMessageToConversation = useCallback(
@@ -118,7 +117,7 @@ const Home = ({ user, logout }) => {
         };
         newConvo.latestMessageText = message.text;
         if (newConvo.otherUser.username === activeConversation) {
-          newConvo = clearUnread(activeConversation);
+          newConvo.unread = clearUnread(activeConversation);
         }
         setConversations((prev) => [newConvo, ...prev]);
       } else {
@@ -130,7 +129,7 @@ const Home = ({ user, logout }) => {
               convoCopy.latestMessageText = message.text;
               if (convoCopy.otherUser.id === message.senderId) {
                 if (convoCopy.otherUser.username === activeConversation) {
-                  convoCopy = clearUnread(activeConversation);
+                  convoCopy.unread = clearUnread(activeConversation);
                 } else {
                   convoCopy.unread++;
                 }
@@ -152,7 +151,8 @@ const Home = ({ user, logout }) => {
       prev.map((convo) => {
         if (convo.otherUser.username === username) {
           const convoCopy = { ...convo };
-          return clearUnread(convoCopy);
+          convoCopy.unread = clearUnread(convoCopy);
+          return convoCopy;
         } else {
           return convo
         }
