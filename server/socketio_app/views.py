@@ -4,6 +4,7 @@ import os
 
 import socketio
 from online_users import online_users
+from messenger_backend.models import Conversation
 
 basedir = os.path.dirname(os.path.realpath(__file__))
 sio = socketio.Server(async_mode=async_mode, logger=False)

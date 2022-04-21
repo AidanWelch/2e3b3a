@@ -23,24 +23,23 @@ class Messages(APIView):
             sender = body.get("sender")
 
             # if we already know conversation id, we can save time and just add it to message and return
-            if conversation_id:
-                conversation = Conversation.objects.filter(id=conversation_id).first()
-                message = Message(
-                    senderId=sender_id, text=text, conversation=conversation
-                )
-                message.save()
-                message_json = message.to_dict()
-                return JsonResponse({"message": message_json, "sender": body["sender"]})
+            conversation = Conversation.objects.filter(id=conversation_id).first() if conversation_id else None
 
             # if we don't have conversation id, find a conversation to m       ake sure it doesn't already exist
-            conversation = Conversation.find_conversation(sender_id, recipient_id)
+            conversation = Conversation.find_conversation(sender_id, recipient_id) if not conversation else conversation
             if not conversation:
                 # create conversation
                 conversation = Conversation(user1_id=sender_id, user2_id=recipient_id)
-                conversation.save()
 
                 if sender and sender["id"] in online_users:
                     sender["online"] = True
+
+            # add to the unread count for the other read as the user
+            if conversation.user1 and conversation.user1.id != sender_id:
+                conversation.user1Unread += 1
+            elif conversation.user2 and conversation.user2.id != sender_id:
+                conversation.user2Unread += 1
+            conversation.save()
 
             message = Message(senderId=sender_id, text=text, conversation=conversation)
             message.save()

@@ -46,11 +46,14 @@ class Conversations(APIView):
                 convo_dict["latestMessageText"] = convo_dict["messages"][0]["text"]
 
                 # set a property "otherUser" so that frontend will have easier access
+				# simultaneously set a property "unread" to indicate how many messages the user has left unread
                 user_fields = ["id", "username", "photoUrl"]
                 if convo.user1 and convo.user1.id != user_id:
                     convo_dict["otherUser"] = convo.user1.to_dict(user_fields)
+                    convo_dict["unread"] = convo.user2Unread
                 elif convo.user2 and convo.user2.id != user_id:
                     convo_dict["otherUser"] = convo.user2.to_dict(user_fields)
+                    convo_dict["unread"] = convo.user1Unread
 
                 # set property for online status of the other user
                 if convo_dict["otherUser"]["id"] in online_users:
@@ -67,5 +70,36 @@ class Conversations(APIView):
                 conversations_response,
                 safe=False,
             )
+        except Exception as e:
+            return HttpResponse(status=500)
+    
+class Read(APIView):
+    def put(self, request):
+        try:
+            user = get_user(request)
+
+            if user.is_anonymous:
+                return HttpResponse(status=401)
+
+            sender_id = user.id
+            body = request.data
+            conversation_id = body.get("conversationId")
+
+            conversation = Conversation.objects.filter(id=conversation_id).first() if conversation_id else None
+
+            if not conversation:
+                return HttpResponse(status=404)
+
+            # clear the unread for the user in the conversation
+            if conversation.user1 and conversation.user1.id == sender_id:
+                conversation.user1Unread = 0
+            elif conversation.user2 and conversation.user2.id == sender_id:
+                conversation.user2Unread = 0
+            else:
+                return HttpResponse(status=403)
+
+            conversation.save()
+
+            return HttpResponse(status=204)
         except Exception as e:
             return HttpResponse(status=500)
